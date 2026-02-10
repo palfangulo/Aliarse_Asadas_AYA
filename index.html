@@ -15,82 +15,97 @@
     <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
     <link rel="stylesheet" href="./resources/qgis2web.css">
 
-    <!-- FULL PAGE MAP FIX -->
-<style>
-    html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        background-color: #ffffff;
-        overflow: hidden;
-    }
+    <!-- FULLSCREEN + UI CSS -->
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
 
-    body {
-        position: fixed;
-        inset: 0;
-    }
+        body {
+            position: fixed;
+            inset: 0;
+        }
 
-    #map {
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        width: 100vw;
-        height: 100vh;
-    }
+        #map {
+            position: absolute;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+        }
 
-    .ol-control > * {
-        background-color: #f8f8f8 !important;
-        color: #444444 !important;
-        border-radius: 0px;
-    }
+        /* OpenLayers controls */
+        .ol-control {
+            background-color: rgba(255, 255, 255, 0.4) !important;
+            padding: 2px !important;
+        }
 
-    .ol-attribution a,
-    .gcd-gl-input::placeholder,
-    .search-layer-input-search::placeholder {
-        color: #444444 !important;
-    }
+        .ol-control > * {
+            background-color: #f8f8f8 !important;
+            color: #444444 !important;
+            border-radius: 0;
+        }
 
-    .search-layer-input-search {
-        background-color: #f8f8f8 !important;
-    }
+        .ol-control > *:hover,
+        .ol-control > *:focus {
+            background-color: rgba(248, 248, 248, 0.7) !important;
+        }
 
-    .ol-control > *:focus,
-    .ol-control > *:hover {
-        background-color: rgba(248, 248, 248, 0.7) !important;
-    }
+        .ol-attribution a,
+        .gcd-gl-input::placeholder,
+        .search-layer-input-search::placeholder {
+            color: #444444 !important;
+        }
 
-    .ol-control {
-        background-color: rgba(255, 255, 255, 0.4) !important;
-        padding: 2px !important;
-    }
-</style>
+        .search-layer-input-search {
+            background-color: #f8f8f8 !important;
+        }
 
+        /* LOGOS */
+        #logos {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            gap: 12px;
+            z-index: 2000;
+            pointer-events: none;
+        }
+
+        #logos img {
+            height: 42px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 8px;
+            border-radius: 6px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+        }
+    </style>
 
     <title>ASADAS AyA WebGIS</title>
 </head>
 
 <body>
+
+    <!-- MAP (ONLY ONE) -->
     <div id="map">
+
+        <!-- LOGOS -->
+        <div id="logos">
+            <img src="Aliarse_Logo.png" alt="Aliarse">
+            <img src="Geolux_logo.png" alt="Geolux">
+        </div>
+
+        <!-- POPUP -->
         <div id="popup" class="ol-popup">
             <a href="#" id="popup-closer" class="ol-popup-closer"></a>
             <div id="popup-content"></div>
         </div>
-    </div>
-    
-<div id="map">
-    <div id="logos">
-        <img src="Aliarse_Logo.png" alt="Aliarse">
-        <img src="Geolux_logo.png" alt="Geolux">
-    </div>
 
-    <div id="popup" class="ol-popup">
-        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-        <div id="popup-content"></div>
     </div>
-</div>
 
     <!-- Scripts -->
     <script src="./resources/qgis2web_expressions.js"></script>
@@ -110,5 +125,6 @@
     <script src="./layers/layers.js"></script>
     <script src="./resources/Autolinker.min.js"></script>
     <script src="./resources/qgis2web.js"></script>
+
 </body>
 </html>
