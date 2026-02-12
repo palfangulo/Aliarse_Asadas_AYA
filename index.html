@@ -15,7 +15,6 @@
     <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
     <link rel="stylesheet" href="./resources/qgis2web.css">
 
-    <!-- FULLSCREEN + UI CSS -->
     <style>
         html, body {
             width: 100%;
@@ -38,7 +37,6 @@
             height: 100vh;
         }
 
-        /* OpenLayers controls */
         .ol-control {
             background-color: rgba(255, 255, 255, 0.4) !important;
             padding: 2px !important;
@@ -47,7 +45,6 @@
         .ol-control > * {
             background-color: #f8f8f8 !important;
             color: #444444 !important;
-            border-radius: 0;
         }
 
         .ol-control > *:hover,
@@ -55,17 +52,10 @@
             background-color: rgba(248, 248, 248, 0.7) !important;
         }
 
-        .ol-attribution a,
-        .gcd-gl-input::placeholder,
-        .search-layer-input-search::placeholder {
-            color: #444444 !important;
-        }
-
         .search-layer-input-search {
             background-color: #f8f8f8 !important;
         }
 
-        /* LOGOS */
         #logos {
             position: absolute;
             bottom: 15px;
@@ -90,69 +80,92 @@
 
 <body>
 
-    <!-- MAP (ONLY ONE) -->
-    <div id="map">
+<div id="map">
 
-        <!-- LOGOS -->
-        <div id="logos">
-            <img src="resources/Aliarse_Logo.png" alt="Aliarse">
-            <img src="resources/Geolux_logo.png" alt="Geolux">
-        </div>
-
-        <!-- POPUP -->
-        <div id="popup" class="ol-popup">
-            <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-            <div id="popup-content"></div>
-        </div>
-
+    <div id="logos">
+        <img src="resources/Aliarse_Logo.png" alt="Aliarse">
+        <img src="resources/Geolux_logo.png" alt="Geolux">
     </div>
 
-    <!-- Scripts -->
-    <script src="./resources/qgis2web_expressions.js"></script>
-    <script src="./resources/functions.js"></script>
-    <script src="./resources/ol.js"></script>
-    <script src="./resources/ol-layerswitcher.js"></script>
-    <script src="./resources/photon-geocoder-autocomplete.min.js"></script>
+    <div id="popup" class="ol-popup">
+        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+        <div id="popup-content"></div>
+    </div>
 
-    <script src="./layers/AsadasAyA_2.js"></script>
-    <script src="./layers/ASADASVisita_3.js"></script>
-    <script src="./layers/Costa_Rica_ADM1_simplifiedsimplified_4.js"></script>
+</div>
 
-    <script src="./styles/AsadasAyA_2_style.js"></script>
-    <script src="./styles/ASADASVisita_3_style.js"></script>
-    <script src="./styles/Costa_Rica_ADM1_simplifiedsimplified_4_style.js"></script>
+<!-- Scripts -->
+<script src="./resources/qgis2web_expressions.js"></script>
+<script src="./resources/functions.js"></script>
+<script src="./resources/ol.js"></script>
+<script src="./resources/ol-layerswitcher.js"></script>
+<script src="./resources/photon-geocoder-autocomplete.min.js"></script>
 
-    <script src="./layers/layers.js"></script>
-    <script src="./resources/Autolinker.min.js"></script>
-    <script src="./resources/qgis2web.js"></script>
+<script src="./layers/AsadasAyA_2.js"></script>
+<script src="./layers/ASADASVisita_3.js"></script>
+<script src="./layers/Costa_Rica_ADM1_simplifiedsimplified_4.js"></script>
+
+<script src="./styles/AsadasAyA_2_style.js"></script>
+<script src="./styles/ASADASVisita_3_style.js"></script>
+<script src="./styles/Costa_Rica_ADM1_simplifiedsimplified_4_style.js"></script>
+
+<script src="./layers/layers.js"></script>
+<script src="./resources/Autolinker.min.js"></script>
+<script src="./resources/qgis2web.js"></script>
+
+<!-- Optimized Route Loader -->
 <script>
 
-fetch('./layers/optimized_route.geojson')
-    .then(response => response.json())
-    .then(data => {
+document.addEventListener("DOMContentLoaded", function () {
 
-        const routeSource = new ol.source.Vector({
-            features: new ol.format.GeoJSON().readFeatures(data, {
-                featureProjection: 'EPSG:3857'
+    // Wait a short moment to ensure qgis2web map is initialized
+    setTimeout(function () {
+
+        if (typeof map === "undefined") {
+            console.error("Map object not found.");
+            return;
+        }
+
+        fetch('./layers/optimized_route.geojson')
+            .then(response => response.json())
+            .then(data => {
+
+                const routeSource = new ol.source.Vector({
+                    features: new ol.format.GeoJSON().readFeatures(data, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:3857'
+                    })
+                });
+
+                const routeLayer = new ol.layer.Vector({
+                    source: routeSource,
+                    style: new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: '#ff0000',
+                            width: 4
+                        })
+                    })
+                });
+
+                routeLayer.set('title', 'Optimized Route');
+                routeLayer.set('type', 'overlay');
+
+                map.addLayer(routeLayer);
+
+                // Optional: Auto-zoom to route
+                map.getView().fit(routeSource.getExtent(), {
+                    padding: [40, 40, 40, 40],
+                    maxZoom: 14
+                });
+
+                console.log("Optimized route loaded successfully.");
+
             })
-        });
+            .catch(error => console.error('Error loading route:', error));
 
-        const routeLayer = new ol.layer.Vector({
-            source: routeSource,
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({
-                    color: '#ff0000',
-                    width: 4
-                })
-            })
-        });
+    }, 500);
 
-        routeLayer.set('title', 'Optimized Route');
-
-        map.addLayer(routeLayer);
-
-    })
-    .catch(error => console.error('Error loading route:', error));
+});
 
 </script>
 
