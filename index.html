@@ -80,84 +80,72 @@ html, body {
 <script src="./resources/qgis2web.js"></script>
 
 <script>
-window.addEventListener('load', function () {
 
-    if (typeof map === "undefined") {
-        console.error("Map not initialized.");
-        return;
-    }
+document.addEventListener("DOMContentLoaded", function () {
 
-    /* ==========================
-       Add Layer Switcher
-    ========================== */
-    var layerSwitcher = new ol.control.LayerSwitcher({
-        activationMode: 'click',
-        startActive: false,
-        groupSelectStyle: 'children'
-    });
-    map.addControl(layerSwitcher);
+    // Wait until qgis2web finishes creating the map
+    setTimeout(function() {
 
-    /* ==========================
-       Load Optimized Route
-    ========================== */
-    fetch('https://palfangulo.github.io/Aliarse_Asadas_AYA/layers/optimized_route.geojson')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("GeoJSON not accessible.");
-            }
-            return response.json();
-        })
-        .then(data => {
+        if (typeof map === "undefined") {
+            console.error("Map not available.");
+            return;
+        }
 
-            var routeSource = new ol.source.Vector({
-                features: new ol.format.GeoJSON().readFeatures(data, {
-                    dataProjection: 'EPSG:4326',
-                    featureProjection: 'EPSG:3857'
-                })
+        console.log("Map ready.");
+
+        /* ==========================
+           SAFE Layer Switcher
+        ========================== */
+        if (!map.getControls().getArray().some(c => c instanceof ol.control.LayerSwitcher)) {
+            var layerSwitcher = new ol.control.LayerSwitcher({
+                activationMode: 'click',
+                startActive: false
             });
+            map.addControl(layerSwitcher);
+        }
 
-            var routeLayer = new ol.layer.Vector({
-                source: routeSource,
-                title: "Optimized Route",
-                type: "overlay",
-                visible: true,
-                style: function() {
-                    return [
-                        new ol.style.Style({
-                            stroke: new ol.style.Stroke({
-                                color: "white",
-                                width: 4
-                            })
-                        }),
-                        new ol.style.Style({
-                            stroke: new ol.style.Stroke({
-                                color: "#cc0000",
-                                width: 2,
-                                lineCap: "round",
-                                lineJoin: "round"
-                            })
+        /* ==========================
+           Load Route Safely
+        ========================== */
+        fetch('./layers/optimized_route.geojson')   // IMPORTANT: local relative path
+            .then(response => response.json())
+            .then(data => {
+
+                var routeSource = new ol.source.Vector({
+                    features: new ol.format.GeoJSON().readFeatures(data, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: map.getView().getProjection()
+                    })
+                });
+
+                var routeLayer = new ol.layer.Vector({
+                    source: routeSource,
+                    title: "Optimized Route",
+                    visible: true,
+                    style: new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: "#cc0000",
+                            width: 2
                         })
-                    ];
-                }
-            });
+                    })
+                });
 
-            map.addLayer(routeLayer);
+                map.addLayer(routeLayer);
 
-            // Force on top
-            map.removeLayer(routeLayer);
-            map.addLayer(routeLayer);
+                map.getView().fit(routeSource.getExtent(), {
+                    padding: [50,50,50,50]
+                });
 
-            map.getView().fit(routeSource.getExtent(), {
-                padding: [60,60,60,60],
-                maxZoom: 14
-            });
+                console.log("Route loaded.");
 
-        })
-        .catch(error => console.error("Route loading error:", error));
+            })
+            .catch(error => console.error("Route error:", error));
 
-});   // <<< THIS WAS MISSING
+    }, 800); // Give qgis2web time to finish
+
+});
 
 </script>
-
+    
 </body>
 </html>
