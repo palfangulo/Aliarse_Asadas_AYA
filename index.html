@@ -125,6 +125,36 @@
     <script src="./layers/layers.js"></script>
     <script src="./resources/Autolinker.min.js"></script>
     <script src="./resources/qgis2web.js"></script>
+<script>
+
+fetch('./layers/optimized_route.geojson')
+    .then(response => response.json())
+    .then(data => {
+
+        const routeSource = new ol.source.Vector({
+            features: new ol.format.GeoJSON().readFeatures(data, {
+                featureProjection: 'EPSG:3857'
+            })
+        });
+
+        const routeLayer = new ol.layer.Vector({
+            source: routeSource,
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: '#ff0000',
+                    width: 4
+                })
+            })
+        });
+
+        routeLayer.set('title', 'Optimized Route');
+
+        map.addLayer(routeLayer);
+
+    })
+    .catch(error => console.error('Error loading route:', error));
+
+</script>
 
 </body>
 </html>
