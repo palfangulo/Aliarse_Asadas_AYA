@@ -25,35 +25,13 @@
             overflow: hidden;
         }
 
-        body {
-            position: fixed;
-            inset: 0;
-        }
+        body { position: fixed; inset: 0; }
 
         #map {
             position: absolute;
             inset: 0;
             width: 100vw;
             height: 100vh;
-        }
-
-        .ol-control {
-            background-color: rgba(255, 255, 255, 0.4) !important;
-            padding: 2px !important;
-        }
-
-        .ol-control > * {
-            background-color: #f8f8f8 !important;
-            color: #444444 !important;
-        }
-
-        .ol-control > *:hover,
-        .ol-control > *:focus {
-            background-color: rgba(248, 248, 248, 0.7) !important;
-        }
-
-        .search-layer-input-search {
-            background-color: #f8f8f8 !important;
         }
 
         #logos {
@@ -113,59 +91,84 @@
 <script src="./resources/Autolinker.min.js"></script>
 <script src="./resources/qgis2web.js"></script>
 
-<!-- Optimized Route Loader -->
+<!-- Ensure LayerSwitcher Exists -->
+<script>
+if (typeof layerSwitcher === "undefined") {
+    var layerSwitcher = new ol.control.LayerSwitcher({
+        activationMode: 'click',
+        startActive: false,
+        tipLabel: 'Layers'
+    });
+    map.addControl(layerSwitcher);
+}
+</script>
+
+<!-- Optimized Route Integration -->
 <script>
 
-document.addEventListener("DOMContentLoaded", function () {
+window.onload = function () {
 
-    // Wait a short moment to ensure qgis2web map is initialized
-    setTimeout(function () {
+    if (typeof map === "undefined") {
+        console.error("Map not initialized.");
+        return;
+    }
 
-        if (typeof map === "undefined") {
-            console.error("Map object not found.");
-            return;
-        }
+    fetch('./layers/optimized_route.geojson')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("GeoJSON not found");
+            }
+            return response.json();
+        })
+        .then(data => {
 
-        fetch('./layers/optimized_route.geojson')
-            .then(response => response.json())
-            .then(data => {
+            const routeSource = new ol.source.Vector({
+                features: new ol.format.GeoJSON().readFeatures(data, {
+                    dataProjection: 'EPSG:4326',
+                    featureProjection: 'EPSG:3857'
+                })
+            });
 
-                const routeSource = new ol.source.Vector({
-                    features: new ol.format.GeoJSON().readFeatures(data, {
-                        dataProjection: 'EPSG:4326',
-                        featureProjection: 'EPSG:3857'
+            const routeLayer = new ol.layer.Vector({
+                source: routeSource,
+                title: "Optimized Route",
+                type: "overlay",
+                visible: true,
+                style: new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: "#ff0000",
+                        width: 6
                     })
-                });
+                })
+            });
 
-                const routeLayer = new ol.layer.Vector({
-                    source: routeSource,
-                    style: new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: '#ff0000',
-                            width: 4
-                        })
-                    })
-                });
+            // Add layer LAST so it draws on top
+            map.addLayer(routeLayer);
 
-                routeLayer.set('title', 'Optimized Route');
-                routeLayer.set('type', 'overlay');
+            // Add to layersList so checkbox appears
+            if (typeof layersList !== "undefined") {
+                layersList.push(routeLayer);
+            }
 
-                map.addLayer(routeLayer);
+            // Refresh layer panel
+            map.getLayers().changed();
 
-                // Optional: Auto-zoom to route
-                map.getView().fit(routeSource.getExtent(), {
-                    padding: [40, 40, 40, 40],
-                    maxZoom: 14
-                });
+            // Force to top
+            map.removeLayer(routeLayer);
+            map.addLayer(routeLayer);
 
-                console.log("Optimized route loaded successfully.");
+            // Zoom to route
+            map.getView().fit(routeSource.getExtent(), {
+                padding: [50, 50, 50, 50],
+                maxZoom: 14
+            });
 
-            })
-            .catch(error => console.error('Error loading route:', error));
+            console.log("Optimized route loaded.");
 
-    }, 500);
+        })
+        .catch(error => console.error("Route loading error:", error));
 
-});
+};
 
 </script>
 
