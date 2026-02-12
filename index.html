@@ -1,62 +1,60 @@
 <!doctype html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport"
-          content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,maximum-scale=1">
 
-    <link rel="stylesheet" href="./resources/ol.css">
-    <link rel="stylesheet" href="./resources/fontawesome-all.min.css">
-    <link rel="stylesheet" href="./resources/photon-geocoder-autocomplete.min.css">
-    <link rel="stylesheet" href="./resources/ol-layerswitcher.css">
-    <link rel="stylesheet" href="./resources/qgis2web.css">
+<link rel="stylesheet" href="./resources/ol.css">
+<link rel="stylesheet" href="./resources/fontawesome-all.min.css">
+<link rel="stylesheet" href="./resources/photon-geocoder-autocomplete.min.css">
+<link rel="stylesheet" href="./resources/ol-layerswitcher.css">
+<link rel="stylesheet" href="./resources/qgis2web.css">
 
-    <style>
-        html, body {
-            width: 100%;
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-        #map {
-            width: 100vw;
-            height: 100vh;
-        }
-        #logos {
-            position: absolute;
-            bottom: 15px;
-            right: 15px;
-            display: flex;
-            gap: 12px;
-            z-index: 2000;
-            pointer-events: none;
-        }
-        #logos img {
-            height: 42px;
-            background: rgba(255,255,255,0.9);
-            padding: 6px 8px;
-            border-radius: 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.25);
-        }
-    </style>
+<style>
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+#map {
+    width: 100vw;
+    height: 100vh;
+}
+#logos {
+    position: absolute;
+    bottom: 15px;
+    right: 15px;
+    display: flex;
+    gap: 12px;
+    z-index: 2000;
+    pointer-events: none;
+}
+#logos img {
+    height: 42px;
+    background: rgba(255,255,255,0.9);
+    padding: 6px 8px;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+}
+</style>
 
-    <title>ASADAS AyA WebGIS</title>
+<title>ASADAS AyA WebGIS</title>
 </head>
 
 <body>
 
 <div id="map">
 
-    <div id="logos">
-        <img src="resources/Aliarse_Logo.png" alt="Aliarse">
-        <img src="resources/Geolux_logo.png" alt="Geolux">
-    </div>
+<div id="logos">
+    <img src="resources/Aliarse_Logo.png">
+    <img src="resources/Geolux_logo.png">
+</div>
 
-    <div id="popup" class="ol-popup">
-        <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-        <div id="popup-content"></div>
-    </div>
+<div id="popup" class="ol-popup">
+    <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+    <div id="popup-content"></div>
+</div>
 
 </div>
 
@@ -89,86 +87,75 @@ window.addEventListener('load', function () {
         return;
     }
 
-    /* ==============================
-       1. Add Layer Switcher Control
-    ===============================*/
+    /* ==========================
+       Add Layer Switcher
+    ========================== */
     var layerSwitcher = new ol.control.LayerSwitcher({
         activationMode: 'click',
-        startActive: true,
+        startActive: false,
         groupSelectStyle: 'children'
     });
     map.addControl(layerSwitcher);
 
-   /* ==============================
-   Load Optimized Route (Refined Style)
-==============================*/
-
-fetch('https://palfangulo.github.io/Aliarse_Asadas_AYA/layers/optimized_route.geojson')
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("GeoJSON file not accessible via GitHub Pages.");
-        }
-        return response.json();
-    })
-    .then(data => {
-
-        var routeSource = new ol.source.Vector({
-            features: new ol.format.GeoJSON().readFeatures(data, {
-                dataProjection: 'EPSG:4326',
-                featureProjection: 'EPSG:3857'
-            })
-        });
-
-        var routeLayer = new ol.layer.Vector({
-            source: routeSource,
-            title: "Optimized Route",
-            type: "overlay",
-            visible: true,
-
-            // ---- PROFESSIONAL HALO STYLE ----
-            style: function(feature) {
-                return [
-
-                    // White casing (background)
-                    new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: "white",
-                            width: 4
-                        })
-                    }),
-
-                    // Main route line (foreground)
-                    new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: "rgba(200, 0, 0, 0.9)",
-                            width: 2,
-                            lineCap: "round",
-                            lineJoin: "round"
-                        })
-                    })
-
-                ];
+    /* ==========================
+       Load Optimized Route
+    ========================== */
+    fetch('https://palfangulo.github.io/Aliarse_Asadas_AYA/layers/optimized_route.geojson')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("GeoJSON not accessible.");
             }
-        });
+            return response.json();
+        })
+        .then(data => {
 
-        map.addLayer(routeLayer);
+            var routeSource = new ol.source.Vector({
+                features: new ol.format.GeoJSON().readFeatures(data, {
+                    dataProjection: 'EPSG:4326',
+                    featureProjection: 'EPSG:3857'
+                })
+            });
 
-        // Ensure route always renders on top
-        map.removeLayer(routeLayer);
-        map.addLayer(routeLayer);
+            var routeLayer = new ol.layer.Vector({
+                source: routeSource,
+                title: "Optimized Route",
+                type: "overlay",
+                visible: true,
+                style: function() {
+                    return [
+                        new ol.style.Style({
+                            stroke: new ol.style.Stroke({
+                                color: "white",
+                                width: 4
+                            })
+                        }),
+                        new ol.style.Style({
+                            stroke: new ol.style.Stroke({
+                                color: "#cc0000",
+                                width: 2,
+                                lineCap: "round",
+                                lineJoin: "round"
+                            })
+                        })
+                    ];
+                }
+            });
 
-        // Auto zoom to route
-        map.getView().fit(routeSource.getExtent(), {
-            padding: [60, 60, 60, 60],
-            maxZoom: 14
-        });
+            map.addLayer(routeLayer);
 
-        console.log("Optimized route loaded correctly.");
+            // Force on top
+            map.removeLayer(routeLayer);
+            map.addLayer(routeLayer);
 
-    })
-    .catch(error => {
-        console.error("Route loading error:", error);
-    });
+            map.getView().fit(routeSource.getExtent(), {
+                padding: [60,60,60,60],
+                maxZoom: 14
+            });
+
+        })
+        .catch(error => console.error("Route loading error:", error));
+
+});   // <<< THIS WAS MISSING
 
 </script>
 
