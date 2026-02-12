@@ -125,12 +125,14 @@ window.addEventListener('load', function () {
                 type: "overlay",
                 visible: true,
                 style: new ol.style.Style({
-                    stroke: new ol.style.Stroke({
-                        color: "#ff0000",
-                        width: 2
-                    })
-                })
-            });
+    stroke: new ol.style.Stroke({
+        color: "rgba(220, 0, 0, 0.9)",
+        width: 2,
+        lineCap: "round",
+        lineJoin: "round"
+    })
+})
+
 
             map.addLayer(routeLayer);
 
