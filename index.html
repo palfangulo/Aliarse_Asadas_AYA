@@ -99,63 +99,77 @@ window.addEventListener('load', function () {
     });
     map.addControl(layerSwitcher);
 
-    /* ==============================
-       2. Load Optimized Route
-    ===============================*/
+   /* ==============================
+   Load Optimized Route (Refined Style)
+==============================*/
 
-    fetch('https://palfangulo.github.io/Aliarse_Asadas_AYA/layers/optimized_route.geojson')
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("GeoJSON file not accessible via GitHub Pages.");
-            }
-            return response.json();
-        })
-        .then(data => {
-
-            var routeSource = new ol.source.Vector({
-                features: new ol.format.GeoJSON().readFeatures(data, {
-                    dataProjection: 'EPSG:4326',
-                    featureProjection: 'EPSG:3857'
-                })
-            });
-
-            var routeLayer = new ol.layer.Vector({
-    source: routeSource,
-    title: "Optimized Route",
-    type: "overlay",
-    visible: true,
-    style: new ol.style.Style({
-        stroke: new ol.style.Stroke({
-            color: "rgba(220, 0, 0, 0.85)",
-            width: 1.5,
-            lineCap: "round",
-            lineJoin: "round"
-        })
+fetch('https://palfangulo.github.io/Aliarse_Asadas_AYA/layers/optimized_route.geojson')
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("GeoJSON file not accessible via GitHub Pages.");
+        }
+        return response.json();
     })
-});
+    .then(data => {
 
-
-
-            map.addLayer(routeLayer);
-
-            // Force route to top
-            map.removeLayer(routeLayer);
-            map.addLayer(routeLayer);
-
-            // Zoom to route
-            map.getView().fit(routeSource.getExtent(), {
-                padding: [50,50,50,50],
-                maxZoom: 14
-            });
-
-            console.log("Optimized route loaded correctly.");
-
-        })
-        .catch(error => {
-            console.error("Route loading error:", error);
+        var routeSource = new ol.source.Vector({
+            features: new ol.format.GeoJSON().readFeatures(data, {
+                dataProjection: 'EPSG:4326',
+                featureProjection: 'EPSG:3857'
+            })
         });
 
-});
+        var routeLayer = new ol.layer.Vector({
+            source: routeSource,
+            title: "Optimized Route",
+            type: "overlay",
+            visible: true,
+
+            // ---- PROFESSIONAL HALO STYLE ----
+            style: function(feature) {
+                return [
+
+                    // White casing (background)
+                    new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: "white",
+                            width: 4
+                        })
+                    }),
+
+                    // Main route line (foreground)
+                    new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: "rgba(200, 0, 0, 0.9)",
+                            width: 2,
+                            lineCap: "round",
+                            lineJoin: "round"
+                        })
+                    })
+
+                ];
+            }
+        });
+
+        map.addLayer(routeLayer);
+
+        // Ensure route always renders on top
+        map.removeLayer(routeLayer);
+        map.addLayer(routeLayer);
+
+        // Auto zoom to route
+        map.getView().fit(routeSource.getExtent(), {
+            padding: [60, 60, 60, 60],
+            maxZoom: 14
+        });
+
+        console.log("Optimized route loaded correctly.");
+
+    })
+    .catch(error => {
+        console.error("Route loading error:", error);
+    });
+
 </script>
 
 </body>
