@@ -83,31 +83,14 @@ html, body {
 
 document.addEventListener("DOMContentLoaded", function () {
 
-    // Wait until qgis2web finishes creating the map
     setTimeout(function() {
 
         if (typeof map === "undefined") {
-            console.error("Map not available.");
+            console.error("Map not initialized.");
             return;
         }
 
-        console.log("Map ready.");
-
-        /* ==========================
-           SAFE Layer Switcher
-        ========================== */
-        if (!map.getControls().getArray().some(c => c instanceof ol.control.LayerSwitcher)) {
-            var layerSwitcher = new ol.control.LayerSwitcher({
-                activationMode: 'click',
-                startActive: false
-            });
-            map.addControl(layerSwitcher);
-        }
-
-        /* ==========================
-           Load Route Safely
-        ========================== */
-        fetch('./layers/optimized_route.geojson')   // IMPORTANT: local relative path
+        fetch('./layers/optimized_route.geojson')
             .then(response => response.json())
             .then(data => {
 
@@ -133,19 +116,20 @@ document.addEventListener("DOMContentLoaded", function () {
                 map.addLayer(routeLayer);
 
                 map.getView().fit(routeSource.getExtent(), {
-                    padding: [50,50,50,50]
+                    padding: [40,40,40,40]
                 });
 
-                console.log("Route loaded.");
+                console.log("Route loaded correctly.");
 
             })
-            .catch(error => console.error("Route error:", error));
+            .catch(error => console.error("Route load error:", error));
 
-    }, 800); // Give qgis2web time to finish
+    }, 1000);
 
 });
 
 </script>
+
     
 </body>
 </html>
