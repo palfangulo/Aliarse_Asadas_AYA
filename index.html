@@ -120,18 +120,20 @@ window.addEventListener('load', function () {
             });
 
             var routeLayer = new ol.layer.Vector({
-                source: routeSource,
-                title: "Optimized Route",
-                type: "overlay",
-                visible: true,
-                style: new ol.style.Style({
-    stroke: new ol.style.Stroke({
-        color: "rgba(220, 0, 0, 0.9)",
-        width: 2,
-        lineCap: "round",
-        lineJoin: "round"
+    source: routeSource,
+    title: "Optimized Route",
+    type: "overlay",
+    visible: true,
+    style: new ol.style.Style({
+        stroke: new ol.style.Stroke({
+            color: "rgba(220, 0, 0, 0.85)",
+            width: 1.5,
+            lineCap: "round",
+            lineJoin: "round"
+        })
     })
-})
+});
+
 
 
             map.addLayer(routeLayer);
