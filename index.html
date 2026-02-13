@@ -82,53 +82,6 @@ html, body {
 
 <script>
 
-document.addEventListener("DOMContentLoaded", function () {
-
-    setTimeout(function() {
-
-        if (typeof map === "undefined") {
-            console.error("Map not initialized.");
-            return;
-        }
-
-        fetch('./layers/optimized_route.geojson')
-            .then(response => response.json())
-            .then(data => {
-
-                var routeSource = new ol.source.Vector({
-                    features: new ol.format.GeoJSON().readFeatures(data, {
-                        dataProjection: 'EPSG:4326',
-                        featureProjection: map.getView().getProjection()
-                    })
-                });
-
-                var routeLayer = new ol.layer.Vector({
-                    source: routeSource,
-                    title: "Optimized Route",
-                    visible: true,
-                    style: new ol.style.Style({
-                        stroke: new ol.style.Stroke({
-                            color: "#cc0000",
-                            width: 2
-                        })
-                    })
-                });
-
-                map.addLayer(routeLayer);
-
-                map.getView().fit(routeSource.getExtent(), {
-                    padding: [40,40,40,40]
-                });
-
-                console.log("Route loaded correctly.");
-
-            })
-            .catch(error => console.error("Route load error:", error));
-
-    }, 1000);
-
-});
-
 </script>
 
     
